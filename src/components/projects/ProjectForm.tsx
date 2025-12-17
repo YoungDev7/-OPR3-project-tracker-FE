@@ -119,12 +119,12 @@ export default function ProjectForm({ project, onSubmit, onCancel, onArchive }: 
                     <Button
                         onClick={onArchive}
                         sx={{
-                            color: '#f57c00',
-                            borderColor: '#f57c00',
+                            color: '#d32f2f',
+                            borderColor: '#d32f2f',
                             mr: 'auto',
                             '&:hover': {
-                                bgcolor: 'rgba(245, 124, 0, 0.04)',
-                                borderColor: '#ef6c00'
+                                bgcolor: 'rgba(211, 47, 47, 0.04)',
+                                borderColor: '#b71c1c'
                             }
                         }}
                         variant="outlined"
