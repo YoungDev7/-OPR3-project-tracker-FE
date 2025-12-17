@@ -14,9 +14,10 @@ interface TaskFormProps {
     task?: Task;
     onSubmit: (data: CreateTaskRequest | UpdateTaskRequest) => void;
     onCancel: () => void;
+    onDelete?: () => void;
 }
 
-export default function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
+export default function TaskForm({ task, onSubmit, onCancel, onDelete }: TaskFormProps) {
     const {
         register,
         handleSubmit,
@@ -43,7 +44,7 @@ export default function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
 
     return (
         <Box component="form" onSubmit={handleSubmit(onFormSubmit)}>
-            <DialogTitle sx={{ color: '#ff6b6b' }}>
+            <DialogTitle sx={{ color: '#424242' }}>
                 {task ? 'Edit Task' : 'Create New Task'}
             </DialogTitle>
 
@@ -61,11 +62,11 @@ export default function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '&.Mui-focused fieldset': {
-                                    borderColor: '#ff6b6b'
+                                    borderColor: '#616161'
                                 }
                             },
                             '& .MuiInputLabel-root.Mui-focused': {
-                                color: '#ff6b6b'
+                                color: '#616161'
                             }
                         }}
                     />
@@ -84,11 +85,11 @@ export default function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '&.Mui-focused fieldset': {
-                                    borderColor: '#ff6b6b'
+                                    borderColor: '#616161'
                                 }
                             },
                             '& .MuiInputLabel-root.Mui-focused': {
-                                color: '#ff6b6b'
+                                color: '#616161'
                             }
                         }}
                     />
@@ -106,11 +107,11 @@ export default function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '&.Mui-focused fieldset': {
-                                    borderColor: '#ff6b6b'
+                                    borderColor: '#616161'
                                 }
                             },
                             '& .MuiInputLabel-root.Mui-focused': {
-                                color: '#ff6b6b'
+                                color: '#616161'
                             }
                         }}
                     >
@@ -132,11 +133,11 @@ export default function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '&.Mui-focused fieldset': {
-                                    borderColor: '#ff6b6b'
+                                    borderColor: '#616161'
                                 }
                             },
                             '& .MuiInputLabel-root.Mui-focused': {
-                                color: '#ff6b6b'
+                                color: '#616161'
                             }
                         }}
                     />
@@ -144,10 +145,27 @@ export default function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
             </DialogContent>
 
             <DialogActions sx={{ p: 2 }}>
+                {task && onDelete && (
+                    <Button
+                        onClick={onDelete}
+                        sx={{
+                            color: '#d32f2f',
+                            borderColor: '#d32f2f',
+                            mr: 'auto',
+                            '&:hover': {
+                                bgcolor: 'rgba(211, 47, 47, 0.04)',
+                                borderColor: '#c62828'
+                            }
+                        }}
+                        variant="outlined"
+                    >
+                        Delete Task
+                    </Button>
+                )}
                 <Button
                     onClick={onCancel}
                     sx={{
-                        color: '#666',
+                        color: '#757575',
                         '&:hover': {
                             bgcolor: 'rgba(0, 0, 0, 0.05)'
                         }
@@ -159,9 +177,9 @@ export default function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
                     type="submit"
                     variant="contained"
                     sx={{
-                        bgcolor: '#ff6b6b',
+                        bgcolor: '#616161',
                         '&:hover': {
-                            bgcolor: '#ff5252'
+                            bgcolor: '#424242'
                         }
                     }}
                 >

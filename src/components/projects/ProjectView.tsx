@@ -16,7 +16,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { createTask, fetchProjectById, updateProject } from '../../store/slices/projectSlice';
+import { archiveProject, createTask, fetchProjectById, updateProject } from '../../store/slices/projectSlice';
 import { CreateTaskRequest, UpdateProjectRequest } from '../../types/project';
 import TaskForm from '../tasks/TaskForm';
 import ProjectForm from './ProjectForm';
@@ -44,6 +44,13 @@ export default function ProjectView() {
     const handleEditProject = async (data: UpdateProjectRequest) => {
         if (projectId) {
             await dispatch(updateProject({ projectId: Number(projectId), data }));
+            setOpenEditDialog(false);
+        }
+    };
+
+    const handleArchiveProject = async () => {
+        if (projectId && window.confirm('Are you sure you want to archive this project? Archived projects are read-only.')) {
+            await dispatch(archiveProject(Number(projectId)));
             setOpenEditDialog(false);
         }
     };
@@ -277,6 +284,7 @@ export default function ProjectView() {
                     project={project}
                     onSubmit={handleEditProject}
                     onCancel={() => setOpenEditDialog(false)}
+                    onArchive={handleArchiveProject}
                 />
             </Dialog>
 

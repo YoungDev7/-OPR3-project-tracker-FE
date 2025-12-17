@@ -13,9 +13,10 @@ interface ProjectFormProps {
     project?: Project;
     onSubmit: (data: CreateProjectRequest | UpdateProjectRequest) => void;
     onCancel: () => void;
+    onArchive?: () => void;
 }
 
-export default function ProjectForm({ project, onSubmit, onCancel }: ProjectFormProps) {
+export default function ProjectForm({ project, onSubmit, onCancel, onArchive }: ProjectFormProps) {
     const {
         register,
         handleSubmit,
@@ -39,7 +40,7 @@ export default function ProjectForm({ project, onSubmit, onCancel }: ProjectForm
 
     return (
         <Box component="form" onSubmit={handleSubmit(onFormSubmit)}>
-            <DialogTitle sx={{ color: '#ff6b6b' }}>
+            <DialogTitle sx={{ color: '#424242' }}>
                 {project ? 'Edit Project' : 'Create New Project'}
             </DialogTitle>
 
@@ -57,11 +58,11 @@ export default function ProjectForm({ project, onSubmit, onCancel }: ProjectForm
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '&.Mui-focused fieldset': {
-                                    borderColor: '#ff6b6b'
+                                    borderColor: '#616161'
                                 }
                             },
                             '& .MuiInputLabel-root.Mui-focused': {
-                                color: '#ff6b6b'
+                                color: '#616161'
                             }
                         }}
                     />
@@ -80,11 +81,11 @@ export default function ProjectForm({ project, onSubmit, onCancel }: ProjectForm
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '&.Mui-focused fieldset': {
-                                    borderColor: '#ff6b6b'
+                                    borderColor: '#616161'
                                 }
                             },
                             '& .MuiInputLabel-root.Mui-focused': {
-                                color: '#ff6b6b'
+                                color: '#616161'
                             }
                         }}
                     />
@@ -102,11 +103,11 @@ export default function ProjectForm({ project, onSubmit, onCancel }: ProjectForm
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '&.Mui-focused fieldset': {
-                                    borderColor: '#ff6b6b'
+                                    borderColor: '#616161'
                                 }
                             },
                             '& .MuiInputLabel-root.Mui-focused': {
-                                color: '#ff6b6b'
+                                color: '#616161'
                             }
                         }}
                     />
@@ -114,10 +115,27 @@ export default function ProjectForm({ project, onSubmit, onCancel }: ProjectForm
             </DialogContent>
 
             <DialogActions sx={{ p: 2 }}>
+                {project && onArchive && !project.isArchived && (
+                    <Button
+                        onClick={onArchive}
+                        sx={{
+                            color: '#f57c00',
+                            borderColor: '#f57c00',
+                            mr: 'auto',
+                            '&:hover': {
+                                bgcolor: 'rgba(245, 124, 0, 0.04)',
+                                borderColor: '#ef6c00'
+                            }
+                        }}
+                        variant="outlined"
+                    >
+                        Archive Project
+                    </Button>
+                )}
                 <Button
                     onClick={onCancel}
                     sx={{
-                        color: '#666',
+                        color: '#757575',
                         '&:hover': {
                             bgcolor: 'rgba(0, 0, 0, 0.05)'
                         }
@@ -129,9 +147,9 @@ export default function ProjectForm({ project, onSubmit, onCancel }: ProjectForm
                     type="submit"
                     variant="contained"
                     sx={{
-                        bgcolor: '#ff6b6b',
+                        bgcolor: '#616161',
                         '&:hover': {
-                            bgcolor: '#ff5252'
+                            bgcolor: '#424242'
                         }
                     }}
                 >

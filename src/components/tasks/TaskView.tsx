@@ -2,7 +2,7 @@ import { Box, Button, CircularProgress, Dialog, Paper, Typography } from '@mui/m
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { fetchProjectById, updateTask } from '../../store/slices/projectSlice';
+import { deleteTask, fetchProjectById, updateTask } from '../../store/slices/projectSlice';
 import { CreateTaskRequest, TaskStatus, UpdateTaskRequest } from '../../types/project';
 import TaskForm from './TaskForm';
 
@@ -36,6 +36,16 @@ export default function TaskView() {
                 data: updateData
             }));
             setOpenEditDialog(false);
+        }
+    };
+
+    const handleDeleteTask = async () => {
+        if (projectId && taskId && window.confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
+            await dispatch(deleteTask({
+                projectId: Number(projectId),
+                taskId: Number(taskId)
+            }));
+            navigate(`/projects/${projectId}`);
         }
     };
 
@@ -154,6 +164,7 @@ export default function TaskView() {
                     task={task}
                     onSubmit={handleEditTask}
                     onCancel={() => setOpenEditDialog(false)}
+                    onDelete={handleDeleteTask}
                 />
             </Dialog>
         </Box>
