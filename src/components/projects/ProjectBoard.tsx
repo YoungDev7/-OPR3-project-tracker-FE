@@ -1,6 +1,7 @@
 import {
     Box,
     Button,
+    CircularProgress,
     Dialog,
     Paper,
     Table,
@@ -9,45 +10,70 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    TableSortLabel,
     Typography
 } from '@mui/material';
-import { useState } from 'react';
-import { Project } from '../../types/project';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { createProject, fetchAllProjects } from '../../store/slices/projectSlice';
+import { CreateProjectRequest } from '../../types/project';
 import ProjectForm from './ProjectForm';
+
+type SortField = 'dueDate' | 'updatedAt';
+type SortOrder = 'asc' | 'desc';
 
 export default function ProjectBoard() {
     const [openCreateDialog, setOpenCreateDialog] = useState(false);
+    const [sortField, setSortField] = useState<SortField>('updatedAt');
+    const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+    const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+    const { projects, isLoading } = useAppSelector((state) => state.projects);
 
-    // Mock data - replace with actual data from props/state
-    const projects: Project[] = [];
+    useEffect(() => {
+        dispatch(fetchAllProjects());
+    }, [dispatch]);
 
     const handleProjectClick = (projectId: number) => {
-        // Navigation logic will be added
-        console.log('Navigate to project:', projectId);
+        navigate(`/projects/${projectId}`);
     };
 
-    const handleCreateProject = (data: any) => {
-        console.log('Create project:', data);
+    const handleCreateProject = async (data: CreateProjectRequest) => {
+        await dispatch(createProject(data));
         setOpenCreateDialog(false);
     };
 
+    const handleSort = (field: SortField) => {
+        const isAsc = sortField === field && sortOrder === 'asc';
+        setSortOrder(isAsc ? 'desc' : 'asc');
+        setSortField(field);
+    };
+
+    const sortedProjects = [...projects].sort((a, b) => {
+        const aValue = new Date(a[sortField]).getTime();
+        const bValue = new Date(b[sortField]).getTime();
+        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+    });
+
     return (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: 4 }}>
             {/* Header */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h5" sx={{ color: '#ff6b6b' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+                <Typography variant="h4" sx={{ color: '#424242', fontWeight: 500 }}>
                     Project List
                 </Typography>
                 <Button
-                    variant="outlined"
+                    variant="contained"
                     onClick={() => setOpenCreateDialog(true)}
                     sx={{
-                        borderColor: '#ff9800',
-                        color: '#ff9800',
+                        bgcolor: '#616161',
+                        color: '#fff',
                         '&:hover': {
-                            borderColor: '#f57c00',
-                            bgcolor: 'rgba(255, 152, 0, 0.1)'
-                        }
+                            bgcolor: '#424242'
+                        },
+                        textTransform: 'none',
+                        px: 3
                     }}
                 >
                     Create New
@@ -55,19 +81,75 @@ export default function ProjectBoard() {
             </Box>
 
             {/* Project Table */}
-            <TableContainer component={Paper} sx={{ border: '2px solid #ff6b6b' }}>
+            <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e0e0e0' }}>
                 <Table>
                     <TableHead>
-                        <TableRow>
-                            <TableCell sx={{ color: '#ff6b6b', fontWeight: 'bold' }}>Title</TableCell>
-                            <TableCell sx={{ color: '#ff6b6b', fontWeight: 'bold' }}>Done Tasks / Total Tasks</TableCell>
-                            <TableCell sx={{ color: '#ff6b6b', fontWeight: 'bold' }}>Due Date</TableCell>
-                            <TableCell sx={{ color: '#ff6b6b', fontWeight: 'bold' }}>Updated At</TableCell>
-                            <TableCell sx={{ color: '#ff6b6b', fontWeight: 'bold' }}>Archived</TableCell>
+                        <TableRow sx={{ bgcolor: '#fafafa' }}>
+                            <TableCell sx={{ color: '#616161', fontWeight: 600 }}>Title</TableCell>
+                            <TableCell sx={{ color: '#616161', fontWeight: 600 }}>Done Tasks / Total Tasks</TableCell>
+                            <TableCell sx={{ color: '#616161', fontWeight: 600 }}>
+                                <TableSortLabel
+                                    active={sortField === 'dueDate'}
+                                    direction={sortField === 'dueDate' ? sortOrder : 'asc'}
+                                    onClick={() => handleSort('dueDate')}
+                                    sx={{
+                                        '&.MuiTableSortLabel-root': {
+                                            color: '#616161',
+                                        },
+                                        '&.MuiTableSortLabel-root:hover': {
+                                            color: '#424242',
+                                        },
+                                        '&.Mui-active': {
+                                            color: '#424242',
+                                        },
+                                        '& .MuiTableSortLabel-icon': {
+                                            color: '#424242 !important',
+                                        },
+                                    }}
+                                >
+                                    Due Date
+                                </TableSortLabel>
+                            </TableCell>
+                            <TableCell sx={{ color: '#616161', fontWeight: 600 }}>
+                                <TableSortLabel
+                                    active={sortField === 'updatedAt'}
+                                    direction={sortField === 'updatedAt' ? sortOrder : 'asc'}
+                                    onClick={() => handleSort('updatedAt')}
+                                    sx={{
+                                        '&.MuiTableSortLabel-root': {
+                                            color: '#616161',
+                                        },
+                                        '&.MuiTableSortLabel-root:hover': {
+                                            color: '#424242',
+                                        },
+                                        '&.Mui-active': {
+                                            color: '#424242',
+                                        },
+                                        '& .MuiTableSortLabel-icon': {
+                                            color: '#424242 !important',
+                                        },
+                                    }}
+                                >
+                                    Updated At
+                                </TableSortLabel>
+                            </TableCell>
+                            <TableCell sx={{ color: '#616161', fontWeight: 600 }}>Archived</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {projects.map((project) => {
+                        {isLoading ? (
+                            <TableRow>
+                                <TableCell colSpan={5} align="center">
+                                    <CircularProgress sx={{ color: '#616161' }} />
+                                </TableCell>
+                            </TableRow>
+                        ) : projects.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={5} align="center">
+                                    <Typography sx={{ color: '#757575', py: 4 }}>No projects yet. Create your first project!</Typography>
+                                </TableCell>
+                            </TableRow>
+                        ) : sortedProjects.map((project) => {
                             const doneTasks = project.tasks?.filter(t => t.status === 'DONE').length || 0;
                             const totalTasks = project.tasks?.length || 0;
 
@@ -78,19 +160,19 @@ export default function ProjectBoard() {
                                     sx={{
                                         cursor: 'pointer',
                                         '&:hover': {
-                                            bgcolor: 'rgba(255, 107, 107, 0.1)'
+                                            bgcolor: '#f5f5f5'
                                         }
                                     }}
                                 >
-                                    <TableCell sx={{ color: '#ff6b6b' }}>{project.title}</TableCell>
-                                    <TableCell sx={{ color: '#ff6b6b' }}>{doneTasks} / {totalTasks}</TableCell>
-                                    <TableCell sx={{ color: '#ff6b6b' }}>
+                                    <TableCell sx={{ color: '#424242' }}>{project.title}</TableCell>
+                                    <TableCell sx={{ color: '#616161' }}>{doneTasks} / {totalTasks}</TableCell>
+                                    <TableCell sx={{ color: '#616161' }}>
                                         {new Date(project.dueDate).toLocaleDateString()}
                                     </TableCell>
-                                    <TableCell sx={{ color: '#ff6b6b' }}>
+                                    <TableCell sx={{ color: '#616161' }}>
                                         {new Date(project.updatedAt).toLocaleDateString()}
                                     </TableCell>
-                                    <TableCell sx={{ color: '#ff6b6b' }}>
+                                    <TableCell sx={{ color: '#616161' }}>
                                         {project.isArchived ? 'Yes' : 'No'}
                                     </TableCell>
                                 </TableRow>

@@ -5,7 +5,9 @@ import Register from './components/auth/Register';
 import InitializationHandler from './components/InitializationHandler';
 import Layout from './components/Layout';
 import ProjectBoard from './components/projects/ProjectBoard';
+import ProjectView from './components/projects/ProjectView';
 import ProtectedRoute from './components/ProtectedRoute';
+import TaskView from './components/tasks/TaskView';
 
 function App() {
 
@@ -26,6 +28,8 @@ function App() {
           {/*here are child components to be rendered inside of outlet */}
           <Route path="/" element={<Navigate to="/projects" replace />} />
           <Route path="/projects" element={<ProjectBoard />} />
+          <Route path="/projects/:projectId" element={<ProjectView />} />
+          <Route path="/projects/:projectId/tasks/:taskId" element={<TaskView />} />
         </Route>
       </Routes>
     </AuthHandler>

@@ -2,30 +2,39 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Box, Button, Divider, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { handleLogout } from '../store/slices/authSlice';
 
 export default function Sidebar() {
     const navigate = useNavigate();
-    const username = "username"; // Replace with actual username from state/props
+    const dispatch = useAppDispatch();
+    const user = useAppSelector((state) => state.auth.user);
+    const username = user?.name || user?.email || 'User';
+
+    const onLogout = async () => {
+        await dispatch(handleLogout());
+        navigate('/login');
+    };
 
     return (
         <Box
             sx={{
-                width: 200,
+                width: 240,
                 height: '100vh',
-                borderRight: '2px solid #ff6b6b',
+                borderRight: '1px solid #e0e0e0',
                 display: 'flex',
                 flexDirection: 'column',
                 p: 2,
-                bgcolor: '#fff'
+                bgcolor: '#fafafa'
             }}
         >
             {/* User Profile Section */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                <AccountCircleIcon sx={{ fontSize: 40, color: '#ff6b6b' }} />
-                <Typography variant="body1">{username}</Typography>
+                <AccountCircleIcon sx={{ fontSize: 40, color: '#616161' }} />
+                <Typography variant="body1" sx={{ color: '#424242' }}>{username}</Typography>
             </Box>
 
-            <Divider sx={{ mb: 2 }} />
+            <Divider sx={{ mb: 2, bgcolor: '#e0e0e0' }} />
 
             {/* Navigation Buttons */}
             <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -33,11 +42,11 @@ export default function Sidebar() {
                     variant="outlined"
                     onClick={() => navigate('/projects')}
                     sx={{
-                        borderColor: '#ff9800',
-                        color: '#ff9800',
+                        borderColor: '#757575',
+                        color: '#424242',
                         '&:hover': {
-                            borderColor: '#f57c00',
-                            bgcolor: 'rgba(255, 152, 0, 0.1)'
+                            borderColor: '#616161',
+                            bgcolor: 'rgba(0, 0, 0, 0.04)'
                         }
                     }}
                 >
@@ -49,13 +58,15 @@ export default function Sidebar() {
             <Button
                 variant="outlined"
                 startIcon={<LogoutIcon />}
-                onClick={() => {/* Logout logic */ }}
+                onClick={onLogout}
                 sx={{
-                    borderColor: '#ff9800',
-                    color: '#ff9800',
+                    borderColor: '#757575',
+                    color: '#424242',
+                    mt: 2,
+                    mb: 3,
                     '&:hover': {
-                        borderColor: '#f57c00',
-                        bgcolor: 'rgba(255, 152, 0, 0.1)'
+                        borderColor: '#616161',
+                        bgcolor: 'rgba(0, 0, 0, 0.04)'
                     }
                 }}
             >

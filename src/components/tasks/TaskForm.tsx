@@ -8,19 +8,12 @@ import {
     TextField
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
-import { Task, TaskStatus } from '../../types/project';
+import { CreateTaskRequest, Task, TaskStatus, UpdateTaskRequest } from '../../types/project';
 
 interface TaskFormProps {
     task?: Task;
-    onSubmit: (data: TaskFormData) => void;
+    onSubmit: (data: CreateTaskRequest | UpdateTaskRequest) => void;
     onCancel: () => void;
-}
-
-interface TaskFormData {
-    title: string;
-    description: string;
-    status: TaskStatus;
-    dueDate: string;
 }
 
 export default function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
@@ -28,7 +21,7 @@ export default function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
         register,
         handleSubmit,
         formState: { errors }
-    } = useForm<TaskFormData>({
+    } = useForm<CreateTaskRequest | UpdateTaskRequest>({
         defaultValues: {
             title: task?.title || '',
             description: task?.description || '',
@@ -37,10 +30,19 @@ export default function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
         }
     });
 
+    const onFormSubmit = (data: CreateTaskRequest | UpdateTaskRequest) => {
+        // Convert date to ISO format for API
+        const formattedData = {
+            ...data,
+            dueDate: new Date(data.dueDate).toISOString()
+        };
+        onSubmit(formattedData);
+    };
+
 
 
     return (
-        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+        <Box component="form" onSubmit={handleSubmit(onFormSubmit)}>
             <DialogTitle sx={{ color: '#ff6b6b' }}>
                 {task ? 'Edit Task' : 'Create New Task'}
             </DialogTitle>

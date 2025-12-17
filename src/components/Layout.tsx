@@ -9,19 +9,20 @@ type Props = {
 export default function Layout({ children }: Props) {
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', p: { xs: 0, md: 2 }, gap: { xs: 0, md: 2 }, boxSizing: 'border-box' }}>
-      <Box sx={{ width: '30vw', flexShrink: 0 }}>
+    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: '#f5f5f5' }}>
+      <Box sx={{ flexShrink: 0 }}>
         <Sidebar />
       </Box>
 
       {/* Main Content */}
       <Box sx={{
-        width: { xs: '100vw', md: '70vw' },
         flexGrow: 1,
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        p: { xs: 1, md: 0 }
+        ml: 4,
+        mr: 4,
+        overflow: 'auto'
       }}>
         {children}
       </Box>

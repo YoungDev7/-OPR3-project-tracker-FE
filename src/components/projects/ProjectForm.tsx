@@ -7,29 +7,20 @@ import {
     TextField
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
-import { useAppDispatch } from '../../store/hooks';
-import { createProject, updateProject } from '../../store/slices/projectSlice';
-import { Project } from '../../types/project';
+import { CreateProjectRequest, Project, UpdateProjectRequest } from '../../types/project';
 
 interface ProjectFormProps {
     project?: Project;
-    onSubmit: (data: ProjectFormData) => void;
+    onSubmit: (data: CreateProjectRequest | UpdateProjectRequest) => void;
     onCancel: () => void;
 }
 
-interface ProjectFormData {
-    title: string;
-    description: string;
-    dueDate: string;
-}
-
 export default function ProjectForm({ project, onSubmit, onCancel }: ProjectFormProps) {
-    const dispatch = useAppDispatch();
     const {
         register,
         handleSubmit,
         formState: { errors }
-    } = useForm<ProjectFormData>({
+    } = useForm<CreateProjectRequest | UpdateProjectRequest>({
         defaultValues: {
             title: project?.title || '',
             description: project?.description || '',
@@ -37,32 +28,17 @@ export default function ProjectForm({ project, onSubmit, onCancel }: ProjectForm
         }
     });
 
-    const handleFormSubmit = async (data: ProjectFormData) => {
-        try {
-            if (project) {
-                await dispatch(updateProject({
-                    projectId: project.id,
-                    data: {
-                        title: data.title,
-                        description: data.description,
-                        dueDate: data.dueDate
-                    }
-                })).unwrap();
-            } else {
-                await dispatch(createProject({
-                    title: data.title,
-                    description: data.description,
-                    dueDate: data.dueDate
-                })).unwrap();
-            }
-            onSubmit(data);
-        } catch (error) {
-            console.error('Failed to save project:', error);
-        }
+    const onFormSubmit = (data: CreateProjectRequest | UpdateProjectRequest) => {
+        // Convert date to ISO format for API
+        const formattedData = {
+            ...data,
+            dueDate: new Date(data.dueDate).toISOString()
+        };
+        onSubmit(formattedData);
     };
 
     return (
-        <Box component="form" onSubmit={handleSubmit(handleFormSubmit)}>
+        <Box component="form" onSubmit={handleSubmit(onFormSubmit)}>
             <DialogTitle sx={{ color: '#ff6b6b' }}>
                 {project ? 'Edit Project' : 'Create New Project'}
             </DialogTitle>
