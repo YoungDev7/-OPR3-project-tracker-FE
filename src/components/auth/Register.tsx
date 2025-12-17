@@ -1,0 +1,287 @@
+import { Alert, CircularProgress, Container, FormControl, Grow, Paper } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Link from '@mui/material/Link';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../../services/Api';
+import { useAppDispatch } from '../../store/hooks';
+import { setToken, setUser } from '../../store/slices/authSlice';
+import { validateRegistrationInputs } from '../../utils/registerValidation';
+import PasswordField from './PasswordField';
+
+/**
+ * Register component that handles user registration.
+ * 
+ * Provides a registration form with validation for:
+ * - Username, email, password, and password confirmation fields
+ * - Password matching validation
+ * - Form submission with success/error feedback
+ * 
+ * The component displays different states:
+ * - Registration form (initial state)
+ * - Loading state during submission
+ * - Success/error feedback after submission
+ * 
+ * Registration requests bypass the auth interceptor since no token is available yet.
+ * 
+ * @returns {React.ReactElement} Registration form or feedback component
+ */
+export default function Register() {
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isRegistrationSuccess, setIsRegistrationSuccess] = useState<boolean | null>(null);
+    const [emailError, setEmailError] = useState(false);
+    const [emailErrorMessage, setEmailErrorMessage] = useState('');
+    const [passwordError, setPasswordError] = useState(false);
+    const [passwordConfirmError, setPasswordConfirmError] = useState(false);
+    const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+    const [passwordConfirmErrorMessage, setPasswordConfirmErrorMessage] = useState('');
+    const [nameError, setNameError] = useState(false);
+    const [nameErrorMessage, setNameErrorMessage] = useState('');
+    const [_isLoginSuccess, setIsLoginSuccess] = useState<boolean | null>(null);
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const [credentials, setCredentials] = useState({
+        username: '',
+        email: '',
+        password: '',
+        passwordConfirm: '',
+    });
+
+    const clearAllFields = () => {
+        setCredentials({
+            username: '',
+            email: '',
+            password: '',
+            passwordConfirm: '',
+        });
+        setEmailError(false);
+        setEmailErrorMessage('');
+        setPasswordError(false);
+        setPasswordErrorMessage('');
+        setPasswordConfirmError(false);
+        setPasswordConfirmErrorMessage('');
+        setNameError(false);
+        setNameErrorMessage('');
+    };
+
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        const validation = validateRegistrationInputs(credentials);
+
+        if (!validation.isValid) {
+            setEmailError(validation.errors.emailError);
+            setEmailErrorMessage(validation.errors.emailErrorMessage);
+            setPasswordError(validation.errors.passwordError);
+            setPasswordErrorMessage(validation.errors.passwordErrorMessage);
+            setPasswordConfirmError(validation.errors.passwordConfirmError);
+            setPasswordConfirmErrorMessage(validation.errors.passwordConfirmErrorMessage);
+            setNameError(validation.errors.nameError);
+            setNameErrorMessage(validation.errors.nameErrorMessage);
+            return;
+        }
+
+        setIsSubmitted(true);
+        setIsLoginSuccess(null);
+        setIsRegistrationSuccess(null);
+
+        try {
+            await api.post('/auth/register', credentials, { skipAuthInterceptor: true });
+            setIsRegistrationSuccess(true);
+
+            try {
+                const responseLogin = await api.post('/auth/authenticate', { email: credentials.email, password: credentials.password }, { skipAuthInterceptor: true });
+                dispatch(setToken(responseLogin.data.access_token));
+                dispatch(setUser(responseLogin.data.access_token));
+                setIsLoginSuccess(true);
+                clearAllFields();
+                navigate('/');
+            } catch (error) {
+                setIsLoginSuccess(false);
+                console.log("login after registration failed: " + error);
+            }
+
+        } catch (error) {
+            setIsRegistrationSuccess(false);
+            console.error("registration error " + error);
+        } finally {
+            setIsSubmitted(false);
+        }
+    };
+
+    let buttonContent;
+    if (isSubmitted) {
+        buttonContent = <CircularProgress size={24} sx={{ color: 'white' }} />;
+    } else {
+        buttonContent = 'Register';
+    }
+
+    return (
+        <Container
+            maxWidth="sm"
+            sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '100vh'
+            }}
+        >
+            <Box sx={{ width: '100%', maxWidth: 400, mx: 'auto' }}>
+                {isRegistrationSuccess === false && (
+                    <Box sx={{ mb: 2 }}>
+                        <Grow in={!isRegistrationSuccess}>
+                            <Alert
+                                severity="error"
+                                variant='filled'
+                            >
+                                Registration failed
+                            </Alert>
+                        </Grow>
+                    </Box>
+                )}
+                {isRegistrationSuccess === true && (
+                    <Box sx={{ mb: 2 }}>
+                        <Grow in={isRegistrationSuccess}>
+                            <Alert
+                                severity="success"
+                                variant='filled'
+                            >
+                                Registration successful
+                            </Alert>
+                        </Grow>
+                    </Box>
+                )}
+                <Paper
+                    elevation={3}
+                    sx={{
+                        p: { xs: 3, md: 5 },
+                        width: '100%',
+                        maxWidth: 400,
+                        backgroundColor: 'background.paper',
+                        mx: 'auto'
+                    }}
+                >
+                    <Typography
+                        component="h1"
+                        variant="h4"
+                        sx={{
+                            width: '100%',
+                            fontSize: 'clamp(2rem, 10vw, 2.15rem)',
+                            mb: 3
+                        }}
+                    >
+                        Register
+                    </Typography>
+                    <Box
+                        component="form"
+                        onSubmit={handleSubmit}
+                        sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}
+                    >
+                        <FormControl>
+                            <TextField
+                                fullWidth
+                                label="Username"
+                                autoComplete="username"
+                                id="username"
+                                value={credentials.username}
+                                disabled={isSubmitted}
+                                onChange={(e) => setCredentials({
+                                    ...credentials,
+                                    username: e.target.value
+                                })}
+                                error={nameError}
+                                helperText={nameErrorMessage || ' '}
+                                color={nameError ? 'error' : 'primary'}
+                                sx={{ mb: 1 }}
+                            />
+                        </FormControl>
+                        <FormControl>
+                            <TextField
+                                fullWidth
+                                id="email"
+                                name="email"
+                                autoComplete="email"
+                                type="email"
+                                label="Email"
+                                variant="outlined"
+                                value={credentials.email}
+                                disabled={isSubmitted}
+                                onChange={(e) => setCredentials({
+                                    ...credentials,
+                                    email: e.target.value
+                                })}
+                                error={emailError}
+                                helperText={emailErrorMessage || ' '}
+                                color={emailError ? 'error' : 'primary'}
+                                sx={{ mb: 1 }}
+                            />
+                        </FormControl>
+                        <FormControl>
+                            <PasswordField
+                                label="Password"
+                                id="password"
+                                name="password"
+                                autoComplete="new-password"
+                                value={credentials.password}
+                                onChange={(value) => setCredentials({
+                                    ...credentials,
+                                    password: value
+                                })}
+                                disabled={isSubmitted}
+                                error={passwordError}
+                                helperText={passwordErrorMessage || ' '}
+                            />
+                        </FormControl>
+                        <FormControl>
+                            <PasswordField
+                                label="Confirm Password"
+                                id="passwordConfirm"
+                                name="passwordConfirm"
+                                autoComplete="passwordConfirm"
+                                value={credentials.passwordConfirm}
+                                onChange={(value) => setCredentials({
+                                    ...credentials,
+                                    passwordConfirm: value
+                                })}
+                                disabled={isSubmitted}
+                                error={passwordConfirmError}
+                                helperText={passwordConfirmErrorMessage || ' '}
+                            />
+                        </FormControl>
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            disabled={isSubmitted}
+                            sx={{ mt: 3, mb: 3 }}
+                        >
+                            {buttonContent}
+                        </Button>
+                    </Box>
+                    <Divider sx={{ mb: 3 }} />
+                    <Typography variant="body2" sx={{ textAlign: 'center' }}>
+                        Already have an account?{' '}
+                        <Link
+                            href="/login"
+                            sx={{
+                                color: 'primary.main',
+                                textDecoration: 'none',
+                                '&:hover': {
+                                    textDecoration: 'underline'
+                                }
+                            }}
+                        >
+                            Login now
+                        </Link>
+                    </Typography>
+                </Paper>
+            </Box>
+        </Container>
+    )
+}
+
+
